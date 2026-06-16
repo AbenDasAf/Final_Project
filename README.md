@@ -14,3 +14,5 @@ Filter Band by Genre(For example: Power Metal = Powerwolf, Sabaton, Gloryhammer,
 Filter Album Display by Dollar Pricing(for example: Display Any album between 20$-100$)
 The API needs to bring a certain Album with all the Data related to it.
 The store should generate ID for each album for "Easy Access"(For example: "Curse of the Crystal Coconut" by Alestorm is 2144).
+
+Date: The 16th of June, 2026.
