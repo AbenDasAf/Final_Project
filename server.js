@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { logger } from './utils/logger.js'; // Ensure this file exists in your utils folder
+import { logger } from './utils/logger.js';
 import router from './routes/index.js';
 
 
@@ -26,7 +26,7 @@ app.use('/api', router);
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).json({ error: 'Something went wrong on the server!' });
+    res.status(500).json({ error: 'Something went wrong!' });
 });
 
 

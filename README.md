@@ -2,7 +2,7 @@ Start Date: The 15th of June, 2026.
 
 
 
-Workers: Asaf Ben David(325655553) & Netanel Gitman(212664056)
+Workers: Netanel Gitman(212664056) & Asaf Ben David(325655553)
 
 
 
