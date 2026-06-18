@@ -1,15 +1,12 @@
 import { Router } from 'express';
-import { albumsController } from '../controllers/albums.controller.js';
+import { getAllAlbums, getAlbumById, getRandomMusicFact } from '../../controllers/albums.controllers.js';
 
 const router = Router();
 
+router.get('/', getAllAlbums);
 
-router.get('/', albumsController.getAllAlbums);
+router.get('/fact/random', getRandomMusicFact);
 
-
-router.get('/:id', albumsController.getAlbumById);
-
-
-router.get('/:id/fact', albumsController.getAlbumFact);
+router.get('/:id', getAlbumById);
 
 export default router;

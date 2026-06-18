@@ -1,11 +1,7 @@
 import { Router } from 'express';
-
+import albumRoutes from './albumRoutes/album.routes.js';
 
 const router = Router();
-
-
-router.get('/health', (req, res) => {
-    res.json({ status: "Server is fully operational" });
-});
+router.use('/items', albumRoutes);
 
 export default router;

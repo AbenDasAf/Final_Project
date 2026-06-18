@@ -1,79 +1,47 @@
-import { albumsService } from '../services/albums.service.js';
+import { getAlbumWithDetailsFromMB } from '../services/musicbrainz.service.js';
+import * as itemsDal from '../DAL/items.dal.js';
+import { logger } from '../utils/logger.js';
 
-export const albumsController = {
+export const getAllAlbums = async (req, res, next) => {
+    try {
+        logger("Request received: GET /api/items");
+        const { minPrice, maxPrice, genre } = req.query;
+        let albums = await itemsDal.readAllItems();
 
-    getAllAlbums: async (req, res, next) => {
-        try {
-
-            const filters = req.query;
-            const albums = await albumsService.getAlbums(filters);
-            
-            return res.status(200).json({
-                status: "success",
-                count: albums.length,
-                data: albums
-            });
-        } catch (error) {
-            next(error);
+        if (minPrice) {
+            albums = albums.filter(album => album.price >= parseFloat(minPrice));
         }
-    },
 
-
-    getAlbumById: async (req, res, next) => {
-        try {
-            const { id } = req.params;
-            const album = await albumsService.getAlbumById(id);
-
-            if (!album) {
-                return res.status(404).json({
-                    status: "error",
-                    message: `Album with ID ${id} not found.`
-                });
-            }
-
-            return res.status(200).json({
-                status: "success",
-                data: album
-            });
-        } catch (error) {
-            next(error);
+        if (maxPrice) {
+            albums = albums.filter(album => album.price <= parseFloat(maxPrice));
         }
-    },
 
-    getAlbumFact: async (req, res, next) => {
-        try {
-            const { id } = req.params;
-            const enrichedAlbum = await albumsService.getAlbumWithExternalFact(id);
-
-            if (!enrichedAlbum) {
-                return res.status(404).json({
-                    status: "error",
-                    message: `Album with ID ${id} could not be found to fetch trivia.`
-                });
-            }
-
-            return res.status(200).json({
-                status: "success",
-                data: enrichedAlbum
-            });
-        } catch (error) {
-            next(error);
+        if (genre) {
+            albums = albums.filter(album => 
+                album.genres && album.genres.some(g => g.toLowerCase() === genre.toLowerCase())
+            );
         }
+
+        return res.status(200).json({
+            status: "success",
+            results: albums.length,
+            data: albums
+        });
+    } catch (error) {
+        next(error);
     }
 };
-
-import { getAlbumWithDetailsFromMB } from '../services/musicbrainz.service.js';
 
 export const getAlbumById = async (req, res, next) => {
     try {
         const { id } = req.params;
+        logger(`Request received: GET /api/items/${id}`);
         
-        const localAlbum = await albumService.getAlbumByLocalId(id); 
-        
+        const localAlbum = await itemsDal.readItemById(id); 
         if (!localAlbum) {
             return res.status(404).json({ 
                 status: "error", 
-                message: "Album not found in our store database." 
+                message: "Album not found in store database." 
             });
         }
 
@@ -89,9 +57,35 @@ export const getAlbumById = async (req, res, next) => {
             status: "success",
             data: enrichedAlbum
         });
-
     } catch (error) {
         next(error);
     }
 };
 
+export const getRandomMusicFact = async (req, res, next) => {
+    try {
+        logger("Request received: GET /api/items/fact/random");
+        const randomMbid = await itemsDal.getRandomMusicBrainzId();
+        
+        if (!randomMbid) {
+            return res.status(404).json({ 
+                status: "error", 
+                message: "No albums available to fetch facts." 
+            });
+        }
+
+        const musicBrainzData = await getAlbumWithDetailsFromMB(randomMbid);
+        
+        return res.status(200).json({
+            status: "success",
+            data: {
+                albumName: musicBrainzData.albumName,
+                artistName: musicBrainzData.artistName,
+                totalTracks: musicBrainzData.totalTracks,
+                genres: musicBrainzData.genres
+            }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
