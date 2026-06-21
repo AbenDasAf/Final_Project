@@ -1,35 +1,21 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import { logger } from './utils/logger.js';
+import logger from './utils/logger.js';
+import config from './config/index.js';
 import router from './routes/index.js';
-
-
-dotenv.config();
+import loginRoute from './routes/routes.js';
+import errorHandler from './middlewares/error.middleware.js';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
 
 app.use(cors());
 app.use(express.json());
 
+app.use('/api', loginRoute); 
+app.use('/api', router); 
+app.use(errorHandler);
 
-app.use((req, res, next) => {
-    logger.info(`${req.method} request received at ${req.url}`);
-    next();
-});
-
-
-app.use('/api', router);
-
-
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ error: 'Something went wrong!' });
-});
-
-
-app.listen(PORT, () => {
-    console.log(`Server is running smoothly on http://localhost:${PORT}`);
+// Use the port from your config object here:
+app.listen(config.port, () => {
+    logger.info(`Server is running on http://localhost:${config.port}`);
 });
